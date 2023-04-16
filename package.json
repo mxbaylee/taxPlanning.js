@@ -1,0 +1,22 @@
+{
+  "name": "tax-planning.js",
+  "description": "Designed to assist individuals with long-term tax planning strategies.",
+  "version": "1.0.0",
+  "author": "mxbaylee",
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/mxbaylee/tax-planning.js.git"
+  },
+  "engines": {
+    "node": ">=19.4",
+    "npm": ">=9.2"
+  },
+  "devDependencies": {
+    "mocha": "^10.2.0"
+  }
+}
