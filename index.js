@@ -263,7 +263,7 @@ function listTaxTotals(amountCell, taxBracketsRange) {
  */
 function taxRate(amountCell, taxBracketsRange) {
   if (amountCell === 0) return 0
-  return taxAmount(amountCell, taxBracketsRange) / amountCell
+  return toRate(taxAmount(amountCell, taxBracketsRange) / amountCell)
 }
 
 /**
@@ -307,6 +307,19 @@ function decimalBinarySearch(decimals, min, max, callback) {
 function toMoney(amount) {
   const parsedAmount = parseFloat(amount);
   const roundedNumString = parsedAmount.toFixed(2);
+  const roundedNum = parseFloat(roundedNumString);
+  return roundedNum;
+}
+
+/**
+ * Rounds a number to 4 decimal places.
+ *
+ * @param {number} amount - The input amount to be rounded.
+ * @returns {number} - The rounded number with two decimal places.
+ */
+function toRate(amount) {
+  const parsedAmount = parseFloat(amount);
+  const roundedNumString = parsedAmount.toFixed(4);
   const roundedNum = parseFloat(roundedNumString);
   return roundedNum;
 }
