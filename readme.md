@@ -6,6 +6,12 @@ their lifetime.
 
 The API's are intentionally compatible with [Google Sheets App Scripts][gsas].
 
+## 🌺 Table of Contents
+
+* [🧪 Examples](#-examples)
+* [🚀 Use Cases](#-use-cases)
+* [⌨️  Local Development](#%EF%B8%8F--local-development)
+
 ## 🧪 Examples
 
 A comprehensive example of Federal and State tax bracket combinations exist
@@ -190,6 +196,8 @@ console.log(toWithdraw) // 158_203.50
 console.log(actualRate) // 0.14
 ```
 
+## 🚀 Use Cases
+
 ### 🚵 Full Tax Year
 
 This demonstrates how you could combine multiple brackets into a single set,
@@ -234,6 +242,24 @@ const actualAmount = tp.taxAmount(
   agi,
   combinedTaxBrackets
 )
+```
+
+### 🛣️ Compare States
+
+[![Compare States](./assets/compareStates.png)](./test/compareStates.js)
+
+### 💍 Compare Brackets
+
+[![Compare Brackets](./assets/compareBrackets.png)](./test/compareBrackets.js)
+
+## ⌨️  Local Development
+
+Requires node v19.4 or greater.
+
+```
+git clone git@github.com:mxbaylee/tax-planning.js.git
+npm install
+npm test
 ```
 
 [example]:test/fullYearTaxAmount.js
