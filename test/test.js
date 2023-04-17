@@ -229,3 +229,59 @@ describe('protected.taxBasisFoundation', () => {
     })
   })
 })
+
+describe('.amountByRate', () => {
+  it('finds the amount necessary to create a known tax rate', () => {
+    const goalEffectiveTaxRate = 0.20
+    const taxBracket = [
+      [      0,  10_275, 0.10],
+      [ 10_275,  41_775, 0.12],
+      [ 41_775,  89_075, 0.22],
+      [ 89_075, 170_050, 0.24],
+      [170_050, 215_950, 0.32],
+      [215_950, 539_900, 0.35],
+      [539_900,    null, 0.37]
+    ]
+
+    const toWithdraw = tp.amountByRate(goalEffectiveTaxRate, taxBracket)
+    const actualRate = tp.taxRate(toWithdraw, taxBracket)
+
+    assert.equal(actualRate, goalEffectiveTaxRate)
+  })
+})
+
+describe('.complexAmountByRate', () => {
+  it('finds the amount necessary to create a known tax rate', () => {
+    const goalEffectiveTaxRate = 0.14
+    const capitalGainsIncome = 50_000
+    const incomeTax = [
+      [    0,  10_000, 0.00],
+      [10_000, 25_000, 0.10],
+      [25_000,   null, 0.20],
+    ]
+    const capitalGainTax = [
+      [    0,  40_000, 0.00],
+      [40_000, 85_000, 0.01],
+      [85_000,   null, 0.02],
+    ]
+
+    // action
+    const toWithdraw = tp.complexAmountByRate(
+      goalEffectiveTaxRate,
+      capitalGainsIncome,
+      incomeTax,
+      capitalGainTax
+    )
+
+    // verify
+    const taxBracket = tp.stackTaxBrackets(
+      toWithdraw,
+      incomeTax,
+      capitalGainTax
+    )
+    const agi = toWithdraw + capitalGainsIncome
+    const actualRate = tp.taxRate(agi, taxBracket)
+
+    assert.equal(actualRate, goalEffectiveTaxRate)
+  })
+})

@@ -23,7 +23,7 @@ function amountByRateWithStackedTax(goalRate, capIncome, incomeTaxBrackets, capT
 }
 
 /**
- * 📐 Calculate the amount needed to get taxed at the target rate.
+ * 📏 Calculate the amount needed to get taxed at the target rate.
  *
  * @param {number} targetRate - Rate to target.
  * @param {number[][]} taxBracketsRange - Range that includes 3 columns (threshold, width, rate) and variable rows.
@@ -42,6 +42,35 @@ function amountByRate(targetRate, taxBracketsRange) {
     }
     return accumulator
   }, Math.pow(2, 40))
+}
+
+/**
+ * 📐 Calculate the amount of ordinary income to withdraw, given a fixed capital gains income and a target rate.
+ *
+ * @param {number} targetRate - Target tax rate.
+ * @param {number} capitalGainsIncome - Total capital gains income.
+ * @param {number[][]} incomeTaxBracket - Tax brackets for regular income, represented as an array of arrays with 3 columns (threshold, width, rate) and variable rows.
+ * @param {number[][]} capitalGainsTaxBracket - Tax brackets for capital gains, represented as an array of arrays with 3 columns (threshold, width, rate) and variable rows.
+ * @param {number} [estimatedMaximum=500_000] - Maximum income expected, used  to calculate the tax amount accurately.
+ *
+ * @returns {number} - Amount needed to get taxed at the target rate.
+ */
+function complexAmountByRate(targetRate, capitalGainsIncome, incomeTaxBracket, capitalGainsTaxBracket, estimatedMaximum = 500_000) {
+  return binarySearch(0, estimatedMaximum, (ordinaryIncomeGuess) => {
+    const agi = ordinaryIncomeGuess + capitalGainsIncome
+    const taxBracket = stackTaxBrackets(
+      ordinaryIncomeGuess,
+      incomeTaxBracket,
+      capitalGainsTaxBracket
+    )
+    const effectiveRate = taxRate(agi, taxBracket)
+    if (effectiveRate > targetRate) {
+      return 1
+    } else if (effectiveRate < targetRate) {
+      return -1
+    }
+    return 0
+  })
 }
 
 /**
@@ -277,8 +306,8 @@ function taxRate(amountCell, taxBracketsRange) {
  *
  * @returns {number} - The found value
  */
-function binarySearch(min, max, callback) {
-  if (min > max) {
+function binarySearch(min, max, callback, _max = 1_000) {
+  if (min > max || _max <= 0) {
     return -1
   }
   const mid = Math.ceil(min + max) / 2
@@ -286,9 +315,9 @@ function binarySearch(min, max, callback) {
   if (ret === 0) {
     return mid
   } else if (ret > 0) {
-    return binarySearch(min, mid, callback)
+    return binarySearch(min, mid, callback, _max - 1)
   } else {
-    return binarySearch(mid, max, callback)
+    return binarySearch(mid, max, callback, _max - 1)
   }
 }
 function decimalBinarySearch(decimals, min, max, callback) {
@@ -338,4 +367,5 @@ module.exports = {
   taxBasis,
   taxBasisFoundation,
   taxRate,
+  complexAmountByRate,
 }

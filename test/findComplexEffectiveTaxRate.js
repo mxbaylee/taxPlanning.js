@@ -77,6 +77,55 @@ const buildBracketFromIncome = (ordinaryIncome) => {
   )
 }
 
+describe('.complexAmountByRate', () => {
+  it('finds my ordinary income to achieve my effective tax rate', () => {
+    const capitalGainsIncome = 30_000
+    const targetRate = 0.20
+    const incomeTaxBracket = tp.mergeTaxBrackets(
+      tp.appendDeductionToBracket(
+        variables.federalDeduction,
+        federalInomeTaxes,
+      ),
+      tp.appendDeductionToBracket(
+        variables.californiaDeduction,
+        californiaIncomeTax
+      )
+    )
+    const capitalGainsTaxBracket = tp.mergeTaxBrackets(
+      tp.appendDeductionToBracket( // federal
+        variables.federalDeduction,
+        tp.mergeTaxBrackets(
+          federalCapGainsTax,
+          federalNiit,
+        )
+      ),
+      tp.appendDeductionToBracket( // state
+        variables.californiaDeduction,
+        californiaCapGainsTax
+      )
+    )
+
+    // action
+    const ordinaryIncome = tp.complexAmountByRate(
+      targetRate,
+      capitalGainsIncome,
+      incomeTaxBracket,
+      capitalGainsTaxBracket
+    )
+
+    // assert
+    const taxBracket = tp.stackTaxBrackets(
+      ordinaryIncome,
+      incomeTaxBracket,
+      capitalGainsTaxBracket
+    )
+    const agi = ordinaryIncome + capitalGainsIncome
+    const actualEffectiveRate = tp.taxRate(agi, taxBracket)
+
+    assert.equal(actualEffectiveRate, targetRate)
+  })
+})
+
 /*
  * Given a known capital gains, and a target effective tax rate
  * This demonstrates how to find the amount of ordinary income

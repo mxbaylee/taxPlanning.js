@@ -4,7 +4,7 @@ This toolchain is designed to assist individuals with long-term tax planning
 strategies, such as a Roth conversion ladder and predicting tax liability over
 their lifetime.
 
-The API's are intentionally compatible with [Google Sheet App Scripts][gsas].
+The API's are intentionally compatible with [Google Sheets App Scripts][gsas].
 
 ## 🧪 Examples
 
@@ -134,6 +134,62 @@ console.log(
 */
 ```
 
+### 📏 Amount By Rate
+
+```js
+const tp = require('tax-planning.js')
+const goalEffectiveTaxRate = 0.20
+const taxBracket = [
+  [      0,  10_275, 0.10],
+  [ 10_275,  41_775, 0.12],
+  [ 41_775,  89_075, 0.22],
+  [ 89_075, 170_050, 0.24],
+  [170_050, 215_950, 0.32],
+  [215_950, 539_900, 0.35],
+  [539_900,    null, 0.37]
+]
+
+const toWithdraw = tp.amountByRate(goalEffectiveTaxRate, taxBracket)
+
+console.log(toWithdraw) // 154_099.75
+console.log(tp.taxRate(toWithdraw, taxBracket)) // 0.20
+```
+
+#### 📐 Complex Amount By Rate
+
+```js
+const goalEffectiveTaxRate = 0.14
+const capitalGainsIncome = 50_000
+const incomeTax = [
+  [    0,  10_000, 0.00],
+  [10_000, 25_000, 0.10],
+  [25_000,   null, 0.20],
+]
+const capitalGainTax = [
+  [    0,  40_000, 0.00],
+  [40_000, 85_000, 0.01],
+  [85_000,   null, 0.02],
+]
+
+const toWithdraw = tp.complexAmountByRate(
+  goalEffectiveTaxRate,
+  capitalGainsIncome,
+  incomeTax,
+  capitalGainTax
+)
+
+const taxBracket = tp.stackTaxBrackets(
+  toWithdraw,
+  incomeTax,
+  capitalGainTax
+)
+const agi = toWithdraw + capitalGainsIncome
+const actualRate = tp.taxRate(agi, taxBracket)
+
+console.log(toWithdraw) // 158_203.50
+console.log(actualRate) // 0.14
+```
+
 ### 🚵 Full Tax Year
 
 This demonstrates how you could combine multiple brackets into a single set,
@@ -147,14 +203,15 @@ const tp = require('tax-planning.js')
 // snippet from `./test/fullYearTaxAmount.js`
 const federalTaxBracket = tp.stackTaxBrackets(
   ordinaryIncome,
-  tp.appendDeductionToBracket( federalDeduction,
-    federalInomeTaxes,
+  tp.appendDeductionToBracket(
+    federalDeduction,
+    federalInomeTaxes
   ),
   tp.appendDeductionToBracket(
     federalDeduction,
     tp.mergeTaxBrackets(
       federalCapGainsTax,
-      federalNiit,
+      federalNiit
     )
   )
 )
@@ -171,7 +228,7 @@ const stateTaxBrackets = tp.stackTaxBrackets(
 )
 const combinedTaxBrackets = tp.mergeTaxBrackets(
   federalTaxBracket,
-  stateTaxBrackets,
+  stateTaxBrackets
 )
 const actualAmount = tp.taxAmount(
   agi,
