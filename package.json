@@ -17,9 +17,7 @@
     "npm": ">=9.2"
   },
   "devDependencies": {
+    "asciichart": "^1.5.25",
     "mocha": "^10.2.0"
-  },
-  "dependencies": {
-    "asciichart": "^1.5.25"
   }
 }
