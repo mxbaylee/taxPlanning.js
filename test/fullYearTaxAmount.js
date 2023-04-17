@@ -1,13 +1,12 @@
 const assert = require('node:assert')
 const tp = require('../index')
 
-const variables = {
-  ordinaryIncome:     567_500.00,
-  capitalGainsIncome:       0.00,
-  californiaDeduction:  5_202.00,
-  federalDeduction:    12_950.00,
-}
-variables.agi = variables.ordinaryIncome + variables.capitalGainsIncome
+const ordinaryIncome = 50_500.00
+const capitalGainsIncome = 10_000.00
+const agi = ordinaryIncome + capitalGainsIncome
+const californiaDeduction = 5_202.00
+const federalDeduction = 12_950
+
 const federalInomeTaxes = [
   [      0,  10_275, 0.10],
   [ 10_275,  41_775, 0.12],
@@ -52,13 +51,13 @@ const californiaCapGainsTax = [
 describe('Full Tax Year Calculations', () => {
   it('can get federal tax year values', () => {
     const federalTaxBracket = tp.stackTaxBrackets(
-      variables.ordinaryIncome,
+      ordinaryIncome,
       tp.appendDeductionToBracket(
-        variables.federalDeduction,
+        federalDeduction,
         federalInomeTaxes,
       ),
       tp.appendDeductionToBracket(
-        variables.federalDeduction,
+        federalDeduction,
         tp.mergeTaxBrackets(
           federalCapGainsTax,
           federalNiit,
@@ -66,40 +65,40 @@ describe('Full Tax Year Calculations', () => {
       )
     )
     const actualAmount = tp.taxAmount(
-      variables.agi,
+      agi,
       federalTaxBracket
     )
-    const expectedAmount = 168_138.50
+    const expectedAmount = 5_181.75
     assert.equal(actualAmount, expectedAmount)
   })
   it('can get state tax year values', () => {
     const stateTaxBrackets = tp.stackTaxBrackets(
-      variables.ordinaryIncome,
+      ordinaryIncome,
       tp.appendDeductionToBracket(
-        variables.californiaDeduction,
+        californiaDeduction,
         californiaIncomeTax
       ),
       tp.appendDeductionToBracket(
-        variables.californiaDeduction,
+        californiaDeduction,
         californiaCapGainsTax
       )
     )
     const actualAmount = tp.taxAmount(
-      variables.agi,
+      agi,
       stateTaxBrackets
     )
-    const expectedAmount = 52_843.12
+    const expectedAmount = 2_160.37
     assert.equal(actualAmount, expectedAmount)
   })
   it('can combine federal and state', () => {
     const federalTaxBracket = tp.stackTaxBrackets(
-      variables.ordinaryIncome,
+      ordinaryIncome,
       tp.appendDeductionToBracket(
-        variables.federalDeduction,
+        federalDeduction,
         federalInomeTaxes,
       ),
       tp.appendDeductionToBracket(
-        variables.federalDeduction,
+        federalDeduction,
         tp.mergeTaxBrackets(
           federalCapGainsTax,
           federalNiit,
@@ -107,13 +106,13 @@ describe('Full Tax Year Calculations', () => {
       )
     )
     const stateTaxBrackets = tp.stackTaxBrackets(
-      variables.ordinaryIncome,
+      ordinaryIncome,
       tp.appendDeductionToBracket(
-        variables.californiaDeduction,
+        californiaDeduction,
         californiaIncomeTax
       ),
       tp.appendDeductionToBracket(
-        variables.californiaDeduction,
+        californiaDeduction,
         californiaCapGainsTax
       )
     )
@@ -122,25 +121,25 @@ describe('Full Tax Year Calculations', () => {
       stateTaxBrackets,
     )
     const actualAmount = tp.taxAmount(
-      variables.agi,
+      agi,
       combinedTaxBrackets
     )
-    const expectedAmount = 220_981.62
+    const expectedAmount = 7_342.12
     assert.equal(actualAmount, expectedAmount)
   })
   it('can be combined a second way', () => {
-    variables.ordinaryIncome = 300_000
+    const localOrdinaryIncome = 300_000
 
     const stackedByAuthority = tp.mergeTaxBrackets(
       // federal
       tp.stackTaxBrackets(
-        variables.ordinaryIncome,
+        localOrdinaryIncome,
         tp.appendDeductionToBracket( // income taxes
-          variables.federalDeduction,
+          federalDeduction,
           federalInomeTaxes,
         ),
         tp.appendDeductionToBracket( // capital gains taxes
-          variables.federalDeduction,
+          federalDeduction,
           tp.mergeTaxBrackets(
             federalCapGainsTax,
             federalNiit,
@@ -149,42 +148,42 @@ describe('Full Tax Year Calculations', () => {
       ),
       // state
       tp.stackTaxBrackets(
-        variables.ordinaryIncome,
+        localOrdinaryIncome,
         tp.appendDeductionToBracket( // income taxes
-          variables.californiaDeduction,
+          californiaDeduction,
           californiaIncomeTax
         ),
         tp.appendDeductionToBracket( // capital gains taxes
-          variables.californiaDeduction,
+          californiaDeduction,
           californiaCapGainsTax
         )
       )
     )
 
     const stackedByType = tp.stackTaxBrackets(
-      variables.ordinaryIncome,
+      localOrdinaryIncome,
       // income taxes
       tp.mergeTaxBrackets(
         tp.appendDeductionToBracket( // federal
-          variables.federalDeduction,
+          federalDeduction,
           federalInomeTaxes,
         ),
         tp.appendDeductionToBracket( // state
-          variables.californiaDeduction,
+          californiaDeduction,
           californiaIncomeTax
         ),
       ),
       // capital gains taxes
       tp.mergeTaxBrackets(
         tp.appendDeductionToBracket( // federal
-          variables.federalDeduction,
+          federalDeduction,
           tp.mergeTaxBrackets(
             federalCapGainsTax,
             federalNiit,
           )
         ),
         tp.appendDeductionToBracket( // state
-          variables.californiaDeduction,
+          californiaDeduction,
           californiaCapGainsTax
         )
       )

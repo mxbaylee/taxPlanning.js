@@ -4,6 +4,8 @@ This toolchain is designed to assist individuals with long-term tax planning
 strategies, such as a Roth conversion ladder and predicting tax liability over
 their lifetime.
 
+The API's are intentionally compatible with [Google Sheet App Scripts][gsas].
+
 ## 🧪 Examples
 
 A comprehensive example of Federal and State tax bracket combinations exist
@@ -131,3 +133,51 @@ console.log(
 ]
 */
 ```
+
+### 🚵 Full Tax Year
+
+This demonstrates how you could combine multiple brackets into a single set,
+which you can use to generate the tax amount for various scenarios.
+
+[💡 View the full Example][example]
+
+```js
+const tp = require('tax-planning.js')
+
+// snippet from `./test/fullYearTaxAmount.js`
+const federalTaxBracket = tp.stackTaxBrackets(
+  ordinaryIncome,
+  tp.appendDeductionToBracket( federalDeduction,
+    federalInomeTaxes,
+  ),
+  tp.appendDeductionToBracket(
+    federalDeduction,
+    tp.mergeTaxBrackets(
+      federalCapGainsTax,
+      federalNiit,
+    )
+  )
+)
+const stateTaxBrackets = tp.stackTaxBrackets(
+  ordinaryIncome,
+  tp.appendDeductionToBracket(
+    californiaDeduction,
+    californiaIncomeTax
+  ),
+  tp.appendDeductionToBracket(
+    californiaDeduction,
+    californiaCapGainsTax
+  )
+)
+const combinedTaxBrackets = tp.mergeTaxBrackets(
+  federalTaxBracket,
+  stateTaxBrackets,
+)
+const actualAmount = tp.taxAmount(
+  agi,
+  combinedTaxBrackets
+)
+```
+
+[example]:test/fullYearTaxAmount.js
+[gsas]:https://developers.google.com/sheets/api/quickstart/apps-script
