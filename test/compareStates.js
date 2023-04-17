@@ -47,6 +47,22 @@ const arkansas = {
   ]
 }
 
+const oregon = {
+  deduction: 2_350.00,
+  incomeTax: [
+    [      0,   3_750, 0.0475],
+    [  3_750,   9_450, 0.0675],
+    [  9_450, 125_000, 0.0875],
+    [125_000,    null, 0.0990],
+  ],
+  capitalGainsTax: [
+    [      0,   3_750, 0.0475],
+    [  3_750,   9_450, 0.0675],
+    [  9_450, 125_000, 0.0875],
+    [125_000,    null, 0.0990],
+  ]
+}
+
 const missouri = {
   deduction: 12_950.00,
   incomeTax: [
@@ -125,6 +141,7 @@ console.log(
       generateTaxRatePoints(arkansas),
       generateTaxRatePoints(missouri),
       generateTaxRatePoints(northCarolina),
+      generateTaxRatePoints(oregon),
     ],
     { height: 20,
       format: (number, _idx) => {
@@ -139,6 +156,7 @@ console.log(
         asciichart.green,
         asciichart.magenta,
         asciichart.yellow,
+        asciichart.red,
     ] }
   ),
   '\n'
@@ -149,4 +167,5 @@ console.log(asciichart.blue + '■' + asciichart.reset, 'California')
 console.log(asciichart.green + '■' + asciichart.reset, 'Arkansas')
 console.log(asciichart.magenta + '■' + asciichart.reset, 'Missouri')
 console.log(asciichart.yellow + '■' + asciichart.reset, 'North Carolina')
+console.log(asciichart.red + '■' + asciichart.reset, 'Oregon')
 console.log('/ '.repeat(60))
