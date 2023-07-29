@@ -154,10 +154,37 @@ class Portfolio {
   /**
    * Withdraws an amount from the portfolio.
    *
+   * The naive approach, which works most of the time, would be to sort the
+   * stonks by the absolute distance between the desired ratio and stonk ratio.
+   *
+   * The correct approach would be to split the stonks by less than and greater
+   * than the desired ratio, then sort them by absolute distance. Each
+   * iteration, you'd want one from either list based on which brings you closer
+   * to your desired ratio.
+   *
+   * For example if you were targeting a 0.0 ratio and sorted these shares were
+   * sorted by distance alone,  you'd end up with 1.5 in gains by adding the
+   * first two stonks together. But the first and third stonk get you closer to
+   * the 0.0 ratio.
+   *
+   * ```
+   * const portfolio = new Portfolio([
+   *   new Stonk({ value: 10, gains: 0.5, shares: 10 }), // 0.05
+   *   new Stonk({ value: 10, gains: 1, shares: 10 }), // 0.1
+   *   new Stonk({ value: 10, gains: -1.5, shares: 10 }), // -0.15
+   * ])
+   * const withdraw = portfolio.withdraw(20, 0)
+   * assert.equal(withdraw.value, 20)
+   * assert.equal(withdraw.gains, -1)
+   * ```
+   *
    * @param {number} withdrawAmount The amount to withdraw.
    * @param {number} [desiredRatio=0.0]
    *        The desired ratio of gains to withdraw. Can be `-1.0` to `1.0` for
-   *        tax gain/loss harvesting.
+   *        tax gain/loss harvesting. This is calculated with
+   *        `desiredGains/desiredValue` for example if you wanted $0 in gains
+   *        and $100 in value you'd want `0.0` to find a withdraw with no tax
+   *        implications.
    * @returns {Withdraw} The withdraw object.
    */
   withdraw (withdrawAmount, desiredRatio = 0.0) {
