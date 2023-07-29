@@ -353,7 +353,12 @@ function toRate(amount) {
   return roundedNum;
 }
 
+const { Withdraw, Portfolio, Stonk } = require('./portfolio')
+
 module.exports = {
+  Withdraw,
+  Portfolio,
+  Stonk,
   amountByRate,
   amountByRateWithStackedTax,
   appendDeductionToBracket,

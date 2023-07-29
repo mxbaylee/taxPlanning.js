@@ -1,5 +1,5 @@
 const assert = require('node:assert')
-const tp = require('../index')
+const tp = require('../src')
 
 describe('.taxAmount', () => {
   it('calculates basic amounts', () => {

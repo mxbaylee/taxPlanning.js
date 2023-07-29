@@ -1,5 +1,5 @@
 const asciichart = require('asciichart')
-const tp = require('../index')
+const tp = require('../src')
 
 const single = {
   deduction: 5_202.00,

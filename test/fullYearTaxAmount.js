@@ -1,5 +1,5 @@
 const assert = require('node:assert')
-const tp = require('../index')
+const tp = require('../src')
 
 const ordinaryIncome = 50_500.00
 const capitalGainsIncome = 10_000.00

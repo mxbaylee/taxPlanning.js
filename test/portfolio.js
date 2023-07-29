@@ -1,5 +1,5 @@
 const assert = require('node:assert')
-const { Withdraw, Portfolio, Stonk } = require('../portfolio')
+const { Withdraw, Portfolio, Stonk } = require('../src')
 
 describe('Stonk', () => {
   describe('.ratio', () => {
@@ -266,9 +266,9 @@ describe('Portfolio', () => {
     })
     it('happy tax loss harvesting', () => {
       const portfolio = new Portfolio([
-        new Stonk({ value: 10, gains: -10, shares: 10 }), // ratio: -1
         new Stonk({ value: 10, gains: 0, shares: 10 }), // ratio: 0.067
         new Stonk({ value: 10, gains: 8, shares: 10 }), // ratio: 0.8
+        new Stonk({ value: 10, gains: -10, shares: 10 }), // ratio: -1
       ])
       const withdraw = portfolio.withdraw(20, -1.0)
       assert.equal(withdraw.value, 20, 'value')

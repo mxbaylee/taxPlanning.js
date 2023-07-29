@@ -1,5 +1,5 @@
 const assert = require('node:assert')
-const tp = require('../index')
+const tp = require('../src')
 
 const variables = {
   californiaDeduction:  5_202.00,

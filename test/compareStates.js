@@ -1,5 +1,5 @@
 const asciichart = require('asciichart')
-const tp = require('../index')
+const tp = require('../src')
 
 
 // states without income or cap gain taxes:
