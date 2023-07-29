@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/mxbaylee/tax-planning.js.git"
+    "url": "git+ssh://git@github.com/mxbaylee/taxPlanning.js.git"
   },
   "engines": {
     "node": ">=19.4",

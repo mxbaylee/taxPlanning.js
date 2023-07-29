@@ -4,25 +4,55 @@ This toolchain is designed to assist individuals with long-term tax planning
 strategies, such as a Roth conversion ladder and predicting tax liability over
 their lifetime.
 
-The API's are intentionally compatible with [Google Sheets App Scripts][gsas].
 
 ## 🌺 Table of Contents
 
 * [🧪 Examples](#-examples)
+  * [🏦 Portfolio Examples](#-portfolio-examples)
+  * [💱 Tax Examples](#-tax-examples)
 * [🚀 Use Cases](#-use-cases)
 * [⌨️  Local Development](#%EF%B8%8F--local-development)
 
 ## 🧪 Examples
 
+### 🏦 Portfolio Examples
+
+Given a list of individual purchases (called Stonks) you can emulate tax
+planning strategies on a specific portfolio.
+
+```js
+const { Portfolio } = require('taxPlanning.js')
+
+const portfolio = new Portfolio([
+  new Stonk({ value: 10, gains: 0, shares: 10 }),
+  new Stonk({ value: 10, gains: 8, shares: 10 }),
+  new Stonk({ value: 10, gains: -10, shares: 10 }),
+])
+
+// we want to withdraw $20 and tax-loss harvest as much as possible
+// more specific ratios can be picked to control taxes loss/gains in withdraws
+const withdraw = portfolio.withdraw(20, -1.0)
+
+// withdraw includes 2 full stonks
+console.log(withdraw.value) // 20
+
+// withdraw includes the lowest gains
+console.log(withdraw.gains) // -10
+```
+
+### 💱 Tax Examples
+
+The API's are intentionally compatible with [Google Sheets App Scripts][gsas].
+
 A comprehensive example of Federal and State tax bracket combinations exist
 inside of `./test/fullTaxYearAmount.js`.
 
-### 🏦 Tax Amount
+#### 🏦 Tax Amount
 
 Calculate the tax amount based on a value and a range of tax brackets.
 
 ```js
-const tp = require('tax-planning.js')
+const tp = require('taxPlanning.js')
 const simpleTaxBracket = [
     [    0,  10_000, 0.00],
     [10_000, 25_000, 0.10],
@@ -34,12 +64,12 @@ console.log(
 // => 2_500.00
 ```
 
-### 🚕 Tax Basis
+#### 🚕 Tax Basis
 
 Given an amount, it'll return the basis that would result in `amount` if you included tax.
 
 ```js
-const tp = require('tax-planning.js')
+const tp = require('taxPlanning.js')
 const simpleTaxBracket = [
     [    0,  10_000, 0.00],
     [10_000, 25_000, 0.10],
@@ -51,12 +81,12 @@ console.log(
 // => 14_545.45
 ```
 
-### 🛋️ Append Deduction to Bracket
+#### 🛋️ Append Deduction to Bracket
 
 Instead of subtracting your standard deduction, craft a new tax bracket set with a standard deduction built in.
 
 ```js
-const tp = require('tax-planning.js')
+const tp = require('taxPlanning.js')
 const simpleTaxBracket = [
     [    0,  10_000, 0.00],
     [10_000, 25_000, 0.10],
@@ -74,12 +104,12 @@ console.log(
 */
 ```
 
-### 🧲 Merge Tax Brackets
+#### 🧲 Merge Tax Brackets
 
 Merge two tax brackets into one bracket.
 
 ```js
-const tp = require('tax-planning.js')
+const tp = require('taxPlanning.js')
 const simpleFederal = [
     [    0,  10_000, 0.00],
     [10_000, 25_000, 0.10],
@@ -105,13 +135,13 @@ console.log(
 */
 ```
 
-### 🧱 Stack Tax Brackets
+#### 🧱 Stack Tax Brackets
 
 Stack two tax brackets on a pivot. It's common to pivot on ordinary income,
 while stack capital gains income on top.
 
 ```js
-const tp = require('tax-planning.js')
+const tp = require('taxPlanning.js')
 const ordinaryIncome = 25_000
 const simpleIncome = [
     [     0, 15_000, 0.01],
@@ -140,10 +170,10 @@ console.log(
 */
 ```
 
-### 📏 Amount By Rate
+#### 📏 Amount By Rate
 
 ```js
-const tp = require('tax-planning.js')
+const tp = require('taxPlanning.js')
 const goalEffectiveTaxRate = 0.20
 const taxBracket = [
   [      0,  10_275, 0.10],
@@ -161,7 +191,7 @@ console.log(toWithdraw) // 154_099.75
 console.log(tp.taxRate(toWithdraw, taxBracket)) // 0.20
 ```
 
-#### 📐 Complex Amount By Rate
+##### 📐 Complex Amount By Rate
 
 ```js
 const goalEffectiveTaxRate = 0.14
@@ -206,7 +236,7 @@ which you can use to generate the tax amount for various scenarios.
 [💡 View the full Example][example]
 
 ```js
-const tp = require('tax-planning.js')
+const tp = require('taxPlanning.js')
 
 // snippet from `./test/fullYearTaxAmount.js`
 const federalTaxBracket = tp.stackTaxBrackets(
@@ -257,7 +287,7 @@ const actualAmount = tp.taxAmount(
 Requires node v19.4 or greater.
 
 ```
-git clone git@github.com:mxbaylee/tax-planning.js.git
+git clone git@github.com:mxbaylee/taxPlanning.js.git
 npm install
 npm test
 ```
