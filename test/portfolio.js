@@ -57,6 +57,28 @@ describe('Stonk', () => {
 })
 
 describe('Withdraw', () => {
+  describe('.remaining', () => {
+    it('gives total target with zero stonks', () => {
+      const withdraw = new Withdraw(33.25)
+      assert.equal(withdraw.remaining, 33.25)
+    })
+    it('subtracts stonks', () => {
+      const withdraw = new Withdraw(33.25)
+      withdraw.add(new Stonk({
+        value: 10,
+        shares: 1,
+      }))
+      assert.equal(withdraw.remaining, 23.25)
+    })
+    it('can give negatives', () => {
+      const withdraw = new Withdraw(33.25)
+      withdraw.add(new Stonk({
+        value: 50,
+        shares: 1,
+      }))
+      assert.equal(withdraw.remaining, -16.75)
+    })
+  })
   describe('.ratio', () => {
     it('partial stonk', () => {
       const withdraw = new Withdraw()

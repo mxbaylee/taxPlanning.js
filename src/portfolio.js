@@ -48,8 +48,13 @@ class Stonk {
 }
 
 class Withdraw {
-  constructor () {
+  constructor (targetAmount = 0) {
+    this.targetAmount = targetAmount
     this.stonks = []
+  }
+
+  get remaining () {
+    return this.targetAmount - this.value
   }
 
   /**
@@ -141,37 +146,20 @@ class Portfolio {
     if (withdrawAmount > this.value) {
       throw Error('Your withdraw amount exceeds the portfolio.')
     }
+
     const sortedStonks = this.sortByAbsDistanceFromRatio(desiredRatio)
-    const withdraw = new Withdraw()
-    const followers = []
-    while (true) {
-      const remainingAmount = withdrawAmount - withdraw.value
-      if (remainingAmount <= 0) {
-        break
+
+    return sortedStonks.reduce((withdraw, stonk) => {
+      if (withdraw.remaining > 0) {
+        if (withdraw.remaining > stonk.value) {
+          withdraw.add(stonk)
+        } else {
+          const sharesToTake = withdraw.remaining / (stonk.value / stonk.shares)
+          withdraw.add(stonk, sharesToTake)
+        }
       }
-
-      const followerStonk = followers.shift() || sortedStonks.shift()
-      const leaderStonk = sortedStonks.shift()
-
-      const leaderRatio = Math.abs(desiredRatio - withdraw.ratioWithTempStonk(leaderStonk))
-      const followerRatio = Math.abs(desiredRatio - withdraw.ratioWithTempStonk(followerStonk))
-      const followerWins = !leaderStonk || followerRatio <= leaderRatio
-      const chosenedStonk = followerWins ? followerStonk : leaderStonk
-
-      if (followerWins) {
-        sortedStonks.unshift(leaderStonk)
-      } else {
-        followers.unshift(followerStonk)
-      }
-
-      if (remainingAmount > chosenedStonk.value) {
-        withdraw.add(chosenedStonk)
-      } else {
-        const sharesToTake = remainingAmount / (chosenedStonk.value / chosenedStonk.shares)
-        withdraw.add(chosenedStonk, sharesToTake)
-      }
-    }
-    return withdraw
+      return withdraw
+    }, new Withdraw(withdrawAmount))
   }
 }
 
