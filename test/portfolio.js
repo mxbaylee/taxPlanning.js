@@ -64,7 +64,7 @@ describe('Withdraw', () => {
     })
     it('subtracts stonks', () => {
       const withdraw = new Withdraw(33.25)
-      withdraw.add(new Stonk({
+      withdraw.addByValue(new Stonk({
         value: 10,
         shares: 1,
       }))
@@ -72,7 +72,7 @@ describe('Withdraw', () => {
     })
     it('can give negatives', () => {
       const withdraw = new Withdraw(33.25)
-      withdraw.add(new Stonk({
+      withdraw.addByValue(new Stonk({
         value: 50,
         shares: 1,
       }))
@@ -82,30 +82,30 @@ describe('Withdraw', () => {
   describe('.ratio', () => {
     it('partial stonk', () => {
       const withdraw = new Withdraw()
-      withdraw.add(new Stonk({
+      withdraw.addByValue(new Stonk({
         value: 10,
         gains: 5,
         shares: 1,
-      }), 0.5)
+      }), 5)
       assert.equal(withdraw.ratio, 0.5)
     })
     it('single stonk', () => {
       const withdraw = new Withdraw()
-      withdraw.add(new Stonk({
+      withdraw.addByValue(new Stonk({
         value: 10,
         gains: 5,
         shares: 1,
-      }), 1)
+      }), 10)
       assert.equal(withdraw.ratio, 0.5)
     })
     it('multi stonks', () => {
       const withdraw = new Withdraw()
-      withdraw.add(new Stonk({
+      withdraw.addByValue(new Stonk({
         value: 10,
         gains: 5,
         shares: 1,
       }))
-      withdraw.add(new Stonk({
+      withdraw.addByValue(new Stonk({
         value: 10,
         gains: 0,
         shares: 1,
@@ -114,12 +114,12 @@ describe('Withdraw', () => {
     })
     it('partial multi stonks', () => {
       const withdraw = new Withdraw()
-      withdraw.add(new Stonk({
+      withdraw.addByValue(new Stonk({
         value: 10,
         gains: 5,
         shares: 1,
       }), 0.5)
-      withdraw.add(new Stonk({
+      withdraw.addByValue(new Stonk({
         value: 10,
         gains: 0,
         shares: 1,
@@ -130,25 +130,25 @@ describe('Withdraw', () => {
   describe('.value', () => {
     it('happy path', () => {
       const withdraw = new Withdraw()
-      withdraw.add(new Stonk({
+      withdraw.addByValue(new Stonk({
         value: 10,
         gains: 0,
         shares: 1,
-      }), 1)
+      }), 10)
       assert.equal(withdraw.value, 10)
     })
     it('partial share', () => {
       const withdraw = new Withdraw()
-      withdraw.add(new Stonk({
+      withdraw.addByValue(new Stonk({
         value: 10,
         gains: 0,
         shares: 1,
-      }), 0.5)
+      }), 5)
       assert.equal(withdraw.value, 5)
     })
     it('partial share with multiple shares', () => {
       const withdraw = new Withdraw()
-      withdraw.add(new Stonk({
+      withdraw.addByValue(new Stonk({
         value: 10,
         gains: 0,
         shares: 10,
@@ -157,17 +157,26 @@ describe('Withdraw', () => {
     })
     it('adds two stonks together', () => {
       const withdraw = new Withdraw()
-      withdraw.add(new Stonk({
+      withdraw.addByValue(new Stonk({
         value: 10,
         gains: 0,
         shares: 1,
-      }), 0.5)
-      withdraw.add(new Stonk({
+      }), 5)
+      withdraw.addByValue(new Stonk({
         value: 10,
         gains: 0,
         shares: 1,
-      }), 0.5)
+      }), 5)
       assert.equal(withdraw.value, 10, 'Both stonks are $10, total $20, and we take half of each, so $10')
+    })
+    it('does not add more than the value of the stonk', () => {
+      const withdraw = new Withdraw()
+      withdraw.addByValue(new Stonk({
+        value: 10,
+        gains: 0,
+        shares: 1,
+      }), 50)
+      assert.equal(withdraw.value, 10, 'Stonk only has $10 in value.')
     })
   })
 })
@@ -283,8 +292,8 @@ describe('Portfolio', () => {
         new Stonk({ value: 10, gains: 5, shares: 10 }),
       ])
       const withdraw = portfolio.withdraw(20, 0)
-      assert.equal(withdraw.value, 20)
-      assert.equal(withdraw.gains, 5)
+      assert.equal(withdraw.value, 20, 'value')
+      assert.equal(withdraw.gains, 5, 'gains')
     })
     it('happy tax loss harvesting', () => {
       const portfolio = new Portfolio([
@@ -302,6 +311,16 @@ describe('Portfolio', () => {
       ])
       const withdraw = portfolio.withdraw(5)
       assert.equal(withdraw.value, 5)
+    })
+    it('requiring different buckets', () => {
+      const portfolio = new Portfolio([
+        new Stonk({ value: 10, gains: 0.5, shares: 10 }), // 0.05
+        new Stonk({ value: 10, gains: 1, shares: 10 }), // 0.1
+        new Stonk({ value: 10, gains: -1.5, shares: 10 }), // -0.15
+      ])
+      const withdraw = portfolio.withdraw(20, 0)
+      assert.equal(withdraw.value, 20)
+      assert.equal(withdraw.gains, -1)
     })
   })
 })

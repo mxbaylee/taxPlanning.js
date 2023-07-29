@@ -2,6 +2,14 @@ const threeDecimals = (value) => {
   return Math.round(value * 1_000) / 1_000
 }
 
+const sortByAbsDistance = (desiredRatio) => {
+  return (itemA, itemB) => {
+    const aVal = Math.abs(desiredRatio - itemA.ratio)
+    const bVal = Math.abs(desiredRatio - itemB.ratio)
+    return aVal - bVal
+  }
+}
+
 class Stonk {
   constructor (item) {
     this.item = item
@@ -58,19 +66,21 @@ class Withdraw {
   }
 
   /**
-   * Adds a stock to the list of stocks.
+   * Adds a stock to the list of stocks by value you want to take.
    *
    * @param {Stonk} stonk The stock to add.
-   * @param {number|false} [sharesToWithdraw=false]
-   *        The number of shares to withdraw. If `false`, then all of the shares
-   *        of the stock are added.
+   * @param {number|false} [value=false]
+   *        The total value you want to add to the withdraw, `false` adds all of
+   *        stonk's value.
    * @returns {void}
    */
-  add (stonk, sharesToWithdraw = false) {
-    if (sharesToWithdraw === false) {
+  addByValue (stonk, value = false) {
+    if (value === false) {
       this.stonks.push([stonk, stonk.shares])
     } else {
-      this.stonks.push([stonk, sharesToWithdraw])
+      const withdrawValue = Math.min(stonk.value, value)
+      const sharesToTake = withdrawValue / (stonk.value / stonk.shares)
+      this.stonks.push([stonk, sharesToTake])
     }
   }
 
@@ -119,6 +129,18 @@ class Portfolio {
     return threeDecimals(this.gains / this.value)
   }
 
+  greaterThanAndEqualToRatio (targetRatio = 0.0) {
+    return this.stonks.slice(0).filter((itemA) => {
+      return itemA.ratio >= targetRatio
+    })
+  }
+
+  lessThanRatio (targetRatio = 0.0) {
+    return this.stonks.slice(0).filter((itemA) => {
+      return itemA.ratio < targetRatio
+    })
+  }
+
   /**
    * Sorts the stonks by the absolute distance from the desired ratio.
    *
@@ -126,11 +148,7 @@ class Portfolio {
    * @returns {Array<Stonk>} The sorted stonks.
    */
   sortByAbsDistanceFromRatio(desiredRatio = 0.0) {
-    return this.stonks.slice(0).sort((itemA, itemB) => {
-      const aVal = Math.abs(desiredRatio - itemA.ratio)
-      const bVal = Math.abs(desiredRatio - itemB.ratio)
-      return aVal - bVal
-    })
+    return this.stonks.slice(0).sort(sortByAbsDistance(desiredRatio))
   }
 
   /**
@@ -147,19 +165,40 @@ class Portfolio {
       throw Error('Your withdraw amount exceeds the portfolio.')
     }
 
-    const sortedStonks = this.sortByAbsDistanceFromRatio(desiredRatio)
+    const withdraw = new Withdraw(withdrawAmount)
+    const positiveList = this.greaterThanAndEqualToRatio(desiredRatio).sort(
+      sortByAbsDistance(desiredRatio)
+    )
+    const negativeList = this.lessThanRatio(desiredRatio).sort(
+      sortByAbsDistance(desiredRatio)
+    )
 
-    return sortedStonks.reduce((withdraw, stonk) => {
-      if (withdraw.remaining > 0) {
-        if (withdraw.remaining > stonk.value) {
-          withdraw.add(stonk)
-        } else {
-          const sharesToTake = withdraw.remaining / (stonk.value / stonk.shares)
-          withdraw.add(stonk, sharesToTake)
-        }
+    let positiveIdx = 0
+    let negativeIdx = 0
+
+    for (let i = this.stonks.length;i >= 0; i--) {
+      const remainingAmount = withdrawAmount - withdraw.value
+      if (withdraw.remaining <= 0) {
+        break
       }
-      return withdraw
-    }, new Withdraw(withdrawAmount))
+
+      const negativeStonk = negativeList[negativeIdx] || positiveList[positiveIdx]
+      const positiveStonk = positiveList[positiveIdx] || negativeList[negativeIdx]
+
+      const positiveRatio = Math.abs(desiredRatio - withdraw.ratioWithTempStonk(positiveStonk))
+      const negativeRatio = Math.abs(desiredRatio - withdraw.ratioWithTempStonk(negativeStonk))
+      const negativeWins = negativeRatio <= positiveRatio
+      const chosenedStonk = negativeWins ? negativeStonk : positiveStonk
+
+      if (positiveList.includes(chosenedStonk)) {
+        positiveIdx++
+      } else {
+        negativeIdx++
+      }
+
+      withdraw.addByValue(chosenedStonk, withdraw.remaining)
+    }
+    return withdraw
   }
 }
 
