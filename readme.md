@@ -1,3 +1,5 @@
+📜 The API's are intentionally compatible with [Google Sheets App Scripts][gsas]. 📜
+
 # 💰 Tax Planning
 
 This toolchain is designed to assist individuals with long-term tax planning
@@ -41,8 +43,6 @@ console.log(withdraw.gains) // -10
 ```
 
 ### 💱 Tax Examples
-
-The API's are intentionally compatible with [Google Sheets App Scripts][gsas].
 
 A comprehensive example of Federal and State tax bracket combinations exist
 inside of `./test/fullTaxYearAmount.js`.
